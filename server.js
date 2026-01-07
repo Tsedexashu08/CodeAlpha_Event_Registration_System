@@ -3,6 +3,9 @@ const app = express();
 const supabase = require("./supabaseClient");
 const path = require("path");
 const PORT = process.env.PORT || 3000;
+const userRoutes = require("./routes/authRoutes.js");
+
+app.use('/users', userRoutes);
 
 
 app.use(express.urlencoded({ extended: true }));
