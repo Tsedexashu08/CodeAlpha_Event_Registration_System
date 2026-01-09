@@ -12,7 +12,6 @@ router.get('/verify', authMiddleware, UserController.verifyToken);
 // Protected routes
 router.get('/me', authMiddleware, UserController.getProfile);
 router.put('/profile', authMiddleware, UserController.updateProfile);
-router.put('/change-password', authMiddleware, UserController.changePassword);
 
 // Admin routes
 router.get('/admin/users', authMiddleware, roleMiddleware('admin'), UserController.getAllUsers);

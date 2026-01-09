@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const jwt = require('jsonwebtoken');
+const supabase = require('../supabaseClient');
 
 class UserController {
   /**
@@ -8,34 +8,53 @@ class UserController {
    */
   static async register(req, res) {
     try {
-      const userData = req.body;
+      const { email, password, name, phone } = req.body;
 
-      // Create user using the User model
-      const newUser = await User.create(userData);
+      // Step 1: Sign up the user with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+      });
 
-      // Generate JWT token
-      const token = jwt.sign(
-        { 
-          id: newUser.id, 
-          email: newUser.email, 
-          role: newUser.role 
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: '7d' }
-      );
+      if (authError) {
+        return res.status(400).json({
+          success: false,
+          error: authError.message,
+        });
+      }
 
-      res.status(201).json({ 
+      if (!authData.user) {
+        return res.status(400).json({
+          success: false,
+          error: 'Registration failed, please try again.',
+        });
+      }
+
+      // Step 2: Create a corresponding user profile in our public `users` table
+      const profileData = {
+        id: authData.user.id,
+        email,
+        name,
+        phone,
+        role: 'user', // Default role
+      };
+
+      const newUserProfile = await User.create(profileData);
+
+      res.status(201).json({
         success: true,
-        message: 'User registered successfully', 
+        message: 'User registered successfully. Please check your email to verify your account.',
         data: {
-          user: newUser,
-          token
-        }
+          user: newUserProfile,
+          session: authData.session,
+        },
       });
     } catch (error) {
-      res.status(400).json({ 
+      // If profile creation fails, we should ideally handle the cleanup
+      // of the auth user in Supabase, but for now, we'll just report the error.
+      res.status(400).json({
         success: false,
-        error: error.message 
+        error: error.message,
       });
     }
   }
@@ -48,60 +67,39 @@ class UserController {
     try {
       const { email, password } = req.body;
 
-      // Validate input
       if (!email || !password) {
         return res.status(400).json({
           success: false,
-          error: 'Please provide email and password'
+          error: 'Please provide email and password',
         });
       }
 
-      // Find user by email
-      const userRecord = await User.findByEmail(email);
-      
-      if (!userRecord) {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
         return res.status(401).json({
           success: false,
-          error: 'Invalid credentials'
+          error: 'Invalid credentials',
         });
       }
 
-      // Verify password
-      const isValidPassword = await User.verifyPassword(password, userRecord.password);
-      
-      if (!isValidPassword) {
-        return res.status(401).json({
-          success: false,
-          error: 'Invalid credentials'
-        });
-      }
-
-      // Generate JWT token
-      const token = jwt.sign(
-        { 
-          id: userRecord.id, 
-          email: userRecord.email, 
-          role: userRecord.role 
-        },
-        process.env.JWT_SECRET || 'your-secret-key',
-        { expiresIn: '7d' }
-      );
-
-      // Remove password from response
-      const { password: _, ...userWithoutPassword } = userRecord;
+      const userProfile = await User.findByAuthId(data.user.id);
 
       res.status(200).json({
         success: true,
         message: 'Login successful',
         data: {
-          user: userWithoutPassword,
-          token
-        }
+          user: userProfile,
+          session: data.session,
+        },
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -112,31 +110,31 @@ class UserController {
    */
   static async getProfile(req, res) {
     try {
-      // req.user should be set by auth middleware
-      if (!req.user || !req.user.id) {
+      // req.user is now the Supabase user object from the auth middleware
+      if (!req.user) {
         return res.status(401).json({
           success: false,
-          error: 'Authentication required'
+          error: 'Authentication required',
         });
       }
 
-      const userProfile = await User.findById(req.user.id);
-      
+      const userProfile = await User.findByAuthId(req.user.id);
+
       if (!userProfile) {
         return res.status(404).json({
           success: false,
-          error: 'User not found'
+          error: 'User not found',
         });
       }
 
       res.status(200).json({
         success: true,
-        data: userProfile
+        data: userProfile,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -147,79 +145,27 @@ class UserController {
    */
   static async updateProfile(req, res) {
     try {
-      if (!req.user || !req.user.id) {
+      if (!req.user) {
         return res.status(401).json({
           success: false,
-          error: 'Authentication required'
+          error: 'Authentication required',
         });
       }
 
-      // Don't allow role updates through profile update (unless admin)
-      const updates = { ...req.body };
-      if (req.user.role !== 'admin' && updates.role) {
-        delete updates.role;
-      }
+      // Don't allow role updates through this endpoint
+      const { role, ...updates } = req.body;
 
-      // Prevent updating other users' profiles
-      const updatedUser = await User.update(req.user.id, updates);
-      
+      const updatedUser = await User.updateByAuthId(req.user.id, updates);
+
       res.status(200).json({
         success: true,
         message: 'Profile updated successfully',
-        data: updatedUser
+        data: updatedUser,
       });
     } catch (error) {
       res.status(400).json({
         success: false,
-        error: error.message
-      });
-    }
-  }
-
-  /**
-   * Change password
-   * PUT /api/auth/change-password
-   */
-  static async changePassword(req, res) {
-    try {
-      if (!req.user || !req.user.id) {
-        return res.status(401).json({
-          success: false,
-          error: 'Authentication required'
-        });
-      }
-
-      const { currentPassword, newPassword } = req.body;
-
-      if (!currentPassword || !newPassword) {
-        return res.status(400).json({
-          success: false,
-          error: 'Please provide current and new password'
-        });
-      }
-
-      if (newPassword.length < 6) {
-        return res.status(400).json({
-          success: false,
-          error: 'New password must be at least 6 characters'
-        });
-      }
-
-      const user = await User.changePassword(
-        req.user.id,
-        currentPassword,
-        newPassword
-      );
-
-      res.status(200).json({
-        success: true,
-        message: 'Password changed successfully',
-        data: user
-      });
-    } catch (error) {
-      res.status(400).json({
-        success: false,
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -230,26 +176,26 @@ class UserController {
    */
   static async getAllUsers(req, res) {
     try {
-      // Check if user is admin
-      if (!req.user || req.user.role !== 'admin') {
+      const userProfile = await User.findByAuthId(req.user.id);
+      if (!userProfile || userProfile.role !== 'admin') {
         return res.status(403).json({
           success: false,
-          error: 'Admin access required'
+          error: 'Admin access required',
         });
       }
 
       const { page = 1, limit = 20 } = req.query;
-      
+
       const result = await User.findAll(parseInt(page), parseInt(limit));
 
       res.status(200).json({
         success: true,
-        ...result
+        ...result,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -260,31 +206,31 @@ class UserController {
    */
   static async getUserById(req, res) {
     try {
-      // Check if user is admin
-      if (!req.user || req.user.role !== 'admin') {
+      const userProfile = await User.findByAuthId(req.user.id);
+      if (!userProfile || userProfile.role !== 'admin') {
         return res.status(403).json({
           success: false,
-          error: 'Admin access required'
+          error: 'Admin access required',
         });
       }
 
-      const userProfile = await User.findById(req.params.id);
-      
-      if (!userProfile) {
+      const userToFind = await User.findById(req.params.id);
+
+      if (!userToFind) {
         return res.status(404).json({
           success: false,
-          error: 'User not found'
+          error: 'User not found',
         });
       }
 
       res.status(200).json({
         success: true,
-        data: userProfile
+        data: userToFind,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -295,11 +241,11 @@ class UserController {
    */
   static async updateUserRole(req, res) {
     try {
-      // Check if user is admin
-      if (!req.user || req.user.role !== 'admin') {
+      const adminProfile = await User.findByAuthId(req.user.id);
+      if (!adminProfile || adminProfile.role !== 'admin') {
         return res.status(403).json({
           success: false,
-          error: 'Admin access required'
+          error: 'Admin access required',
         });
       }
 
@@ -308,7 +254,7 @@ class UserController {
       if (!role || !['user', 'organizer', 'admin'].includes(role)) {
         return res.status(400).json({
           success: false,
-          error: 'Valid role is required: user, organizer, or admin'
+          error: 'Valid role is required: user, organizer, or admin',
         });
       }
 
@@ -316,7 +262,7 @@ class UserController {
       if (req.params.id === req.user.id && role !== 'admin') {
         return res.status(400).json({
           success: false,
-          error: 'Cannot remove admin role from yourself'
+          error: 'Cannot remove admin role from yourself',
         });
       }
 
@@ -325,31 +271,40 @@ class UserController {
       res.status(200).json({
         success: true,
         message: `User role updated to ${role}`,
-        data: updatedUser
+        data: updatedUser,
       });
     } catch (error) {
       if (error.message.includes('not found')) {
         return res.status(404).json({
           success: false,
-          error: error.message
+          error: error.message,
         });
       }
 
       res.status(400).json({
         success: false,
-        error: error.message
+        error: error.message,
       });
     }
   }
 
   /**
-   * Logout user (client-side, just returns success)
+   * Logout user
    * POST /api/auth/logout
    */
   static async logout(req, res) {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+
     res.status(200).json({
       success: true,
-      message: 'Logout successful (token should be removed client-side)'
+      message: 'Logout successful',
     });
   }
 
@@ -359,20 +314,21 @@ class UserController {
    */
   static async verifyToken(req, res) {
     try {
+      // The user object is attached by the auth middleware
       if (!req.user) {
         return res.status(401).json({
           success: false,
-          error: 'Invalid or expired token'
+          error: 'Invalid or expired token',
         });
       }
 
-      // Get fresh user data
-      const userProfile = await User.findById(req.user.id);
-      
+      // Get fresh user data from the public profile table
+      const userProfile = await User.findByAuthId(req.user.id);
+
       if (!userProfile) {
         return res.status(404).json({
           success: false,
-          error: 'User not found'
+          error: 'User not found',
         });
       }
 
@@ -380,13 +336,14 @@ class UserController {
         success: true,
         data: {
           user: userProfile,
-          token: req.header('Authorization')?.replace('Bearer ', '')
-        }
+          // The token is now managed client-side, but we can pass it back if needed
+          token: req.headers.authorization?.split(' ')[1],
+        },
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message
+        error: error.message,
       });
     }
   }
