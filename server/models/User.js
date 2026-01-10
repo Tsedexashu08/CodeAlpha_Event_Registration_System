@@ -13,14 +13,13 @@ class User {
           phone: userData.phone || null,
         },
       ])
-      .select('id, auth_id, name, email, role, phone, created_at')
-      .single();
+      .select('id, auth_id, name, email, role, phone, created_at');
 
     if (error) {
       throw new Error(`Database error: ${error.message}`);
     }
 
-    return data;
+    return data ? data[0] : null;
   }
 
   /**
@@ -30,15 +29,14 @@ class User {
     const { data, error } = await supabase
       .from('users')
       .select('id, auth_id, name, email, role, phone, created_at')
-      .eq('email', email)
-      .single();
+      .eq('email', email);
 
     if (error && error.code !== 'PGRST116') {
       // PGRST116 = no rows returned
       throw new Error(`Database error: ${error.message}`);
     }
 
-    return data;
+    return data ? data[0] : null;
   }
 
   /**
@@ -48,14 +46,13 @@ class User {
     const { data, error } = await supabase
       .from('users')
       .select('id, auth_id, name, email, role, phone, created_at')
-      .eq('id', id)
-      .single();
+      .eq('id', id);
 
     if (error) {
       throw new Error(`Database error: ${error.message}`);
     }
 
-    return data;
+    return data ? data[0] : null;
   }
 
   /**
@@ -65,14 +62,13 @@ class User {
     const { data, error } = await supabase
       .from('users')
       .select('id, auth_id, name, email, role, phone, created_at')
-      .eq('auth_id', authId)
-      .single();
+      .eq('auth_id', authId);
 
     if (error) {
       throw new Error(`Database error: ${error.message}`);
     }
-
-    return data;
+    
+    return data ? data[0] : null;
   }
 
   /**
@@ -85,14 +81,13 @@ class User {
       .from('users')
       .update(safeUpdates)
       .eq('id', id)
-      .select('id, auth_id, name, email, role, phone, created_at')
-      .single();
+      .select('id, auth_id, name, email, role, phone, created_at');
 
     if (error) {
       throw new Error(`Database error: ${error.message}`);
     }
 
-    return data;
+    return data ? data[0] : null;
   }
 
   /**
@@ -105,14 +100,13 @@ class User {
       .from('users')
       .update(safeUpdates)
       .eq('auth_id', authId)
-      .select('id, auth_id, name, email, role, phone, created_at')
-      .single();
+      .select('id, auth_id, name, email, role, phone, created_at');
 
     if (error) {
       throw new Error(`Database error: ${error.message}`);
     }
 
-    return data;
+    return data ? data[0] : null;
   }
 
 

@@ -373,21 +373,6 @@ function Login() {
           <div className="signup-link">
             <p>Don't have an account? <a href="/signup">Create one now</a></p>
           </div>
-
-          {/* Social Login Options (Optional) */}
-          <div className="social-login">
-            <p className="social-login-title">Or continue with</p>
-            <div className="social-buttons">
-              <button type="button" className="social-btn google-btn" disabled={isLoading}>
-                <i className="fab fa-google"></i>
-                <span>Google</span>
-              </button>
-              <button type="button" className="social-btn github-btn" disabled={isLoading}>
-                <i className="fab fa-github"></i>
-                <span>GitHub</span>
-              </button>
-            </div>
-          </div>
         </div>
       </section>
 
