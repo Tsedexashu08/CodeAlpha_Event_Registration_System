@@ -1,0 +1,304 @@
+@import './App.css'; 
+
+.dashboard {
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
+  color: var(--dark); 
+  background-color: var(--light);
+  min-height: 100vh;
+}
+
+.main_header {
+    background-color: var(--light-gray); /* Match global header background */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 1rem 0; /* Adjust padding for better look */
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.5rem; /* Slightly smaller than main app logo */
+    font-weight: 700;
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.logo i {
+    color: var(--secondary);
+}
+
+.nav_links {
+    display: flex;
+    gap: 1.5rem; /* Adjust gap for consistency */
+    align-items: center;
+}
+
+.nav_link {
+    text-decoration: none;
+    color: var(--gray); /* Use global gray color */
+    font-weight: 500;
+    transition: var(--transition);
+    position: relative;
+    display: flex; /* For icon and text alignment */
+    align-items: center;
+    gap: 5px;
+}
+
+.nav_link:hover {
+    color: var(--primary);
+}
+
+.nav_link::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--primary);
+    transition: var(--transition);
+}
+
+.nav_link:hover::after {
+    width: 100%;
+}
+
+.cta_button_logout {
+    background-color: var(--accent); /* Use accent color for logout */
+    color: white;
+    padding: 0.5rem 1.2rem;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.cta_button_logout:hover {
+    background-color: #d83d8e; /* Slightly darker accent on hover */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(236, 72, 153, 0.3);
+}
+
+/* Page Content */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px; /* Consistent with App.css */
+}
+
+.page_title {
+    font-size: 2.5rem;
+    color: var(--dark);
+    text-align: center;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.main_content {
+  display: grid;
+  gap: 30px;
+  padding: 2rem 0;
+}
+
+.summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.stat_card {
+    background-color: var(--light-gray); /* Use themed background */
+    border: 1px solid rgba(255, 255, 255, 0.05); /* Themed border */
+    border-radius: var(--border-radius); /* Themed border radius */
+    padding: 20px;
+    text-align: center;
+    box-shadow: var(--box-shadow); /* Themed shadow */
+    transition: var(--transition);
+    margin-bottom: 12px;
+}
+
+.stat_card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary); /* Highlight on hover */
+}
+
+.stat_card h2 {
+    margin-top: 0;
+    font-size: 1.2em;
+    color: var(--gray); /* Themed text color */
+    font-family: 'Poppins', sans-serif;
+}
+
+.stat_card p {
+    font-size: 2.2em; /* Slightly larger for impact */
+    font-weight: bold;
+    margin-bottom: 0;
+    color: var(--primary); /* Highlight count with primary color */
+}
+
+.data_section {
+  background-color: var(--light-gray); /* Themed background */
+  border-radius: var(--border-radius); /* Themed border radius */
+  padding: 20px;
+  box-shadow: var(--box-shadow); /* Themed shadow */
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 12px;
+}
+
+.data_section h2 {
+    color: var(--dark);
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+}
+
+.data_table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.data_table th, .data_table td {
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Themed border */
+  padding: 12px;
+  text-align: left;
+  color: var(--gray); /* Themed text color */
+}
+
+.data_table th {
+  background-color: rgba(99, 102, 241, 0.1); /* Light primary background for header */
+  color: var(--primary);
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+}
+
+.data_table tbody tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.02); /* Slight alternate row shading */
+}
+
+.data_table tbody tr:hover {
+    background-color: rgba(99, 102, 241, 0.08); /* Highlight row on hover */
+}
+
+.action_button {
+  padding: 8px 15px; /* Adjust padding */
+  border: none;
+  background-color: var(--primary);
+  color: white;
+  cursor: pointer;
+  border-radius: 6px; /* Slightly larger radius */
+  margin-right: 8px;
+  font-size: 0.9rem;
+  transition: var(--transition);
+}
+
+.action_button:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.edit_button {
+    background-color: var(--secondary); /* Use secondary for edit */
+}
+.edit_button:hover {
+    background-color: #7b4acf;
+}
+
+.delete_button {
+  background-color: var(--accent); /* Use accent for delete */
+}
+
+.delete_button:hover {
+  background-color: #d83d8e; /* Darker accent on hover */
+  color: #fff;
+}
+
+.error_page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 100vh;
+    background-color: var(--light);
+}
+
+.error_message {
+    color: var(--accent); /* Use accent color for error */
+    background-color: rgba(236, 72, 153, 0.1); /* Light background for error */
+    border: 1px solid var(--accent);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+
+.cta_button { /* General CTA button for error page, etc. */
+    background-color: var(--primary);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.cta_button:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+}
+
+.loading_page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--light);
+    color: var(--gray);
+    font-size: 1.2rem;
+}
+
+.loading_spinner {
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    border-top: 5px solid var(--primary);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading_text {
+    font-family: 'Poppins', sans-serif;
+}

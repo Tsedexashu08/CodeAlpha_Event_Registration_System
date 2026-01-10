@@ -212,16 +212,16 @@ function Signup() {
       const data = await response.json();
 
       if (response.ok) {
-        setAlert({ message: 'Account created successfully! Redirecting to dashboard...', type: 'success' });
+        setAlert({ message: 'Account created successfully! Redirecting to home page...', type: 'success' });
         
         if (data.data && data.data.token) {
           localStorage.setItem('token', data.data.token);
           localStorage.setItem('user', JSON.stringify(data.data.user));
         }
 
-        // setTimeout(() => {
-        //   window.location.href = '/';
-        // }, 2000);
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
       } else {
         setAlert({ message: data.error || 'Registration failed. Please try again.', type: 'error' });
         
