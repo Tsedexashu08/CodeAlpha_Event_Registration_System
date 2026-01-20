@@ -6,6 +6,7 @@ import App from './App';
 import Signup from './pages/SignUp';
 import Login from './pages/Login';
 import Events from './pages/Events';
+import Dashboard from './pages/Dashboard';
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -17,6 +18,7 @@ root.render(
         <Route path="/Signup" element={<Signup />} />
         <Route path="/Login" element={<Login />} />
         <Route path="/Events" element={<Events />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
