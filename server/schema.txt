@@ -28,14 +28,15 @@ CREATE TABLE public.registrations (
   CONSTRAINT registrations_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id),
   CONSTRAINT registrations_event_id_fkey FOREIGN KEY (event_id) REFERENCES public.events(id)
 );
+
 CREATE TABLE public.users (
   id integer NOT NULL DEFAULT nextval('users_id_seq'::regclass),
   name character varying NOT NULL,
   email character varying NOT NULL UNIQUE,
+  password character varying NOT NULL,
   role character varying NOT NULL DEFAULT 'user'::character varying CHECK (role::text = ANY (ARRAY['user'::character varying, 'organizer'::character varying, 'admin'::character varying]::text[])),
   phone character varying,
   created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-  auth_id uuid UNIQUE,
   CONSTRAINT users_pkey PRIMARY KEY (id)
 );

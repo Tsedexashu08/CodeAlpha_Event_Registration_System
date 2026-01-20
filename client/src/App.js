@@ -2,8 +2,6 @@ import React, { useEffect } from "react";
 import "./styles/App.css"; 
 
 function App() {
-  const token = localStorage.getItem('token');
-
   useEffect(() => {
     const animateElements = document.querySelectorAll(".animate");
 
@@ -144,7 +142,7 @@ function App() {
       icon: "fas fa-cogs",
       title: "Admin Dashboard",
       description:
-        "Admins can manage events, view & manage users and their activity",
+        "Admins can manage events, view attendee lists, send updates, and generate reports through a dedicated panel.",
     },
   ];
 
@@ -174,7 +172,7 @@ function App() {
       <header>
         <div className="container">
           <nav className="navbar">
-            <a href="#hero" className="logo">
+            <a href="#" className="logo">
               <i className="fas fa-calendar-alt"></i>
               CodeAlpha EventHub
             </a>
@@ -183,7 +181,7 @@ function App() {
               <a href="#features">Features</a>
               <a href="#tech">Tech Stack</a>
               <a href="#api">API Endpoints</a>
-              <a href={token != null ? "/events" : "/login"} className="cta-button">
+              <a href="#" className="cta-button">
                 <i className="fas fa-rocket"></i> Get Started
               </a>
             </div>
@@ -195,7 +193,7 @@ function App() {
         </div>
       </header>
 
-      <section className="hero" id="hero">
+      <section className="hero">
         <div className="container">
           <div className="hero-content">
             <div className="hero-text animate">
@@ -208,7 +206,7 @@ function App() {
                 Manage events, registrations, and users with a robust API.
               </p>
               <div className="hero-buttons">
-                <a href={token ? "/events" : "/login"} className="cta-button">
+                <a href="#docs" className="cta-button">
                   <i className="fas fa-calendar-check"></i> View events
                 </a>
                 <a
@@ -217,7 +215,9 @@ function App() {
                   rel="noopener noreferrer"
                   className="cta-button"
                   style={{
-                    border: "2px solid white",
+                    backgroundColor: "transparent",
+                    color: "var(--primary)",
+                    border: "2px solid var(--primary)",
                     marginLeft: "1rem",
                   }}
                 >

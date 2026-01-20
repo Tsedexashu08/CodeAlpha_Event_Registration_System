@@ -17,39 +17,21 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState({ message: '', type: '' });
 
+  // const API_BASE_URL = 'http://localhost:3000/';
+
   useEffect(() => {
     checkAuthStatus();
   }, []);
 
-const checkAuthStatus = () => {
-  const token = localStorage.getItem('token');
-  const userString = localStorage.getItem('user');
-  
-  if (token) {
-    setAlert({ message: 'You are already logged in. Redirecting ...', type: 'info' });
-    
-    let user = null;
-    if (userString) {
-      try {
-        user = JSON.parse(userString);
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 2000);
-        return;
-      }
+  const checkAuthStatus = () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setAlert({ message: 'You are already logged in. Redirecting to dashboard...', type: 'info' });
+      // setTimeout(() => {
+      //   window.location.href = '/dashboard';
+      // }, 2000);
     }
-    
-    setTimeout(() => {
-      if (user && user.role === "admin") {
-        window.location.href = '/dashboard';
-      } else {
-        window.location.href = '/';
-      }
-    }, 2000);
-  }
-};
+  };
 
   const handleInputChange = (e) => {
     const { id, value, type, checked } = e.target;
@@ -135,8 +117,8 @@ const checkAuthStatus = () => {
         setAlert({ message: 'Login successful! Redirecting to dashboard...', type: 'success' });
         
         // Store token and user data
-        if (data.data && data.data.session) {
-          localStorage.setItem('token', data.data.session.access_token);
+        if (data.data && data.data.token) {
+          localStorage.setItem('token', data.data.token);
           localStorage.setItem('user', JSON.stringify(data.data.user));
           
           // Store remember me preference
@@ -144,8 +126,10 @@ const checkAuthStatus = () => {
             localStorage.setItem('rememberMe', 'true');
           }
         }
+
+        // Redirect to dashboard after 1.5 seconds
         setTimeout(() => {
-         localStorage.getItem('user') && JSON.parse(localStorage.getItem('user')).role === "admin" ? window.location.href = '/dashboard' : window.location.href = '/events';
+          window.location.href = '/events';
         }, 1500);
       } else {
         setAlert({ message: data.error || 'Login failed. Please check your credentials.', type: 'error' });
@@ -189,10 +173,57 @@ const checkAuthStatus = () => {
     return '';
   };
 
+  const handleForgotPassword = (e) => {
+    e.preventDefault();
+    setAlert({ message: 'Password reset feature coming soon!', type: 'info' });
+    // In a real app, you would redirect to forgot password page
+    // window.location.href = '/forgot-password';
+  };
+
+  const handleDemoLogin = async (role = 'user') => {
+    setIsLoading(true);
+    setAlert({ message: '', type: '' });
+
+    const demoCredentials = role === 'admin' 
+      ? { email: 'admin@example.com', password: 'admin123' }
+      : { email: 'user@example.com', password: 'user123' };
+
+    try {
+      // For demo purposes, we'll simulate a successful login
+      // In a real app, you would make an API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Simulate successful login response
+      const mockUserData = {
+        token: 'demo-token-' + Date.now(),
+        user: {
+          id: '123',
+          name: role === 'admin' ? 'Demo Admin' : 'Demo User',
+          email: demoCredentials.email,
+          role: role
+        }
+      };
+
+      localStorage.setItem('token', mockUserData.token);
+      localStorage.setItem('user', JSON.stringify(mockUserData.user));
+      
+      setAlert({ 
+        message: `Demo ${role} login successful! Redirecting...`, 
+        type: 'success' 
+      });
+
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 1500);
+    } catch (error) {
+      setAlert({ message: 'Demo login failed. Please try again.', type: 'error' });
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="login-page">
-  
+      {/* Header */}
       <header>
         <div className="container">
           <nav className="navbar">
@@ -207,7 +238,7 @@ const checkAuthStatus = () => {
         </div>
       </header>
 
-
+      {/* Login Container */}
       <section className="login-container">
         <div className="login-card">
           <div className="login-header">
@@ -215,13 +246,34 @@ const checkAuthStatus = () => {
             <p>Sign in to your EventHub account</p>
           </div>
 
-  
+          {/* Alert Messages */}
           {alert.message && (
             <div className={`alert alert-${alert.type}`}>
               <i className={`fas fa-${getAlertIcon(alert.type)}`}></i>
               <span>{alert.message}</span>
             </div>
           )}
+
+          {/* Demo Login Buttons */}
+          <div className="demo-login-buttons">
+            <button 
+              type="button" 
+              className="demo-btn demo-user-btn"
+              onClick={() => handleDemoLogin('user')}
+              disabled={isLoading}
+            >
+              <i className="fas fa-user"></i> Try Demo User
+            </button>
+            <button 
+              type="button" 
+              className="demo-btn demo-admin-btn"
+              onClick={() => handleDemoLogin('admin')}
+              disabled={isLoading}
+            >
+              <i className="fas fa-user-shield"></i> Try Demo Admin
+            </button>
+          </div>
+
           <div className="divider">
             <span>Or sign in with email</span>
           </div>
@@ -249,6 +301,13 @@ const checkAuthStatus = () => {
             <div className="form-group">
               <div className="password-label-row">
                 <label className="form-label" htmlFor="password">Password</label>
+                <a 
+                  href="#" 
+                  className="forgot-password-link"
+                  onClick={handleForgotPassword}
+                >
+                  Forgot Password?
+                </a>
               </div>
               <div className="password-container">
                 <input

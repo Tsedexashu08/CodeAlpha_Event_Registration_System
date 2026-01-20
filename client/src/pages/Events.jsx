@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from '../styles/Events.module.css';
-import { useNavigate } from 'react-router-dom';
 
 function Events() {
-  const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -20,7 +18,7 @@ function Events() {
     search: ''
   });
 
-
+  const API_BASE_URL = 'http://localhost:3000/';
 
   useEffect(() => {
     checkAuth();
@@ -43,7 +41,7 @@ function Events() {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/events`);
+      const response = await fetch(`${API_BASE_URL}api/events`);
       const data = await response.json();
       
       if (response.ok) {
@@ -67,7 +65,7 @@ function Events() {
     if (!token) return;
 
     try {
-      const response = await fetch(`/api/registrations/my-registrations`, {
+      const response = await fetch(`${API_BASE_URL}api/registrations/my-registrations`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -161,7 +159,7 @@ function Events() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/registrations`, {
+      const response = await fetch(`${API_BASE_URL}api/registrations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -189,8 +187,6 @@ function Events() {
               : event
           )
         );
-              window.location.reload();
-
       } else {
         alert(data.error || 'Registration failed');
       }
@@ -216,7 +212,7 @@ function Events() {
       
       if (!registration) return;
 
-      const response = await fetch(`/api/registrations/${registration.id}`, {
+      const response = await fetch(`${API_BASE_URL}api/registrations/${registration.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -297,14 +293,10 @@ function Events() {
       </div>
     );
   }
-  const  handleLogout = async(e) => {
-     localStorage.removeItem('token', null);
-     localStorage.removeItem('user', null);
-     navigate('/login');
-  }
 
   return (
     <div className={styles.page}>
+      {/* Header */}
       <header className={styles.header}>
         <div className={styles.container}>
           <nav className={styles.navbar}>
@@ -316,15 +308,15 @@ function Events() {
               <a href="/events" className={`${styles.navLink} ${styles.navLinkActive}`}>
                 <i className="fas fa-calendar"></i> Events
               </a>
-              {user.role === "admin" && (
+              {user && (
                 <a href="/dashboard" className={styles.navLink}>
                   <i className="fas fa-user"></i> Dashboard
                 </a>
               )}
               {user ? (
-                <button onClick={handleLogout} className={`${styles.button} ${styles.buttonLogout}`}>
+                <a href="/logout" className={`${styles.button} ${styles.buttonLogout}`}>
                   <i className="fas fa-sign-out-alt"></i> Logout
-                </button>
+                </a>
               ) : (
                 <>
                   <a href="/login" className={styles.navLink}>
@@ -630,6 +622,14 @@ function Events() {
           </div>
         </div>
       )}
+
+      {/* Footer */}
+      <footer className={styles.footer}>
+        <div className={styles.container}>
+          <p>© {new Date().getFullYear()} CodeAlpha EventHub. All rights reserved.</p>
+          <p>Find amazing events and connect with like-minded people.</p>
+        </div>
+      </footer>
     </div>
   );
 }
