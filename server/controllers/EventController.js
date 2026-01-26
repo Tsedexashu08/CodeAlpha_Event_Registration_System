@@ -1,5 +1,6 @@
 const Event = require('../models/Event');
 const User = require('../models/User');
+const supabase = require('../supabaseClient');
 
 class EventController {
   /**
@@ -59,22 +60,43 @@ class EventController {
    * Requires 'organizer' or 'admin' role
    */
   static async createEvent(req, res) {
-    try {
-      // The user object is attached by the auth middleware
-      const organizerId = req.user.id;
-      const eventData = { ...req.body, organizer_id: organizerId };
-
-      const newEvent = await Event.create(eventData);
-
-      res.status(201).json({
-        success: true,
-        message: 'Event created successfully',
-        data: newEvent,
-      });
-    } catch (error) {
-      res.status(400).json({ success: false, error: error.message });
+  try {
+    // The user object is attached by the auth middleware
+    const authId = req.user.id; // This is the UUID from auth
+    
+    // Query Supabase to get the integer user ID
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('id')
+      .eq('auth_id', authId)
+      .single();
+    
+    if (error) {
+      throw new Error('User not found');
     }
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+    
+    // Now user is an object like { id: 5 }, so we extract the id
+    const organizerId = user.id;
+    const eventData = { ...req.body, organizer_id: organizerId };
+
+    const newEvent = await Event.create(eventData);
+
+    res.status(201).json({
+      success: true,
+      message: 'Event created successfully',
+      data: newEvent,
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
   }
+}
 
   /**
    * Update an existing event
