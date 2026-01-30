@@ -56,3 +56,8 @@ This directory contains the Node.js/Express backend application.
 **client side**- cd to the client folder & run npm start
 **server side**- cd to the server folder & run node server.js
 
+**admin credentials**
+email:admin@gmail.com
+username:admin
+password:Admin@123
+
