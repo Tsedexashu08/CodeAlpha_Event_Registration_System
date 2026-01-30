@@ -13,6 +13,15 @@ This project is a comprehensive Event Registration System made due to task assig
 ### Events List
 ![Events List Screenshot](/events.png)
 
+## Getting Started
+ The below steps are to be carried out after running npm install in both client & server side
+**client side**- cd to the client folder & run npm start
+**server side**- cd to the server folder & run node server.js
+
+## Admin credentials
+**email:**admin@gmail.com
+**username:**admin
+**password:**Admin@123
 ## Architecture: Model-View-Controller (MVC)
 
 The application follows a Model-View-Controller (MVC) architectural pattern, which separates the application into three main logical components:
@@ -51,13 +60,4 @@ This directory contains the Node.js/Express backend application.
 -   **`models/`**: Defines data models and schemas (e.g., `Event.js`, `Registration.js`, `User.js`).
 -   **`routes/`**: Defines API routes and links them to their respective controller functions (e.g., `authRoutes.js`, `eventRoutes.js`, `registrationRoutes.js`).
 
-## Getting Started
- The below steps are to be carried out after running npm install in both client & server side
-**client side**- cd to the client folder & run npm start
-**server side**- cd to the server folder & run node server.js
-
-**admin credentials**
-email:admin@gmail.com
-username:admin
-password:Admin@123
 
